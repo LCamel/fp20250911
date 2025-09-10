@@ -3,5 +3,7 @@ module Worksheet02 (module Worksheet02) where
 import MiniPrelude
 import Prelude ()
 
-doubleAll :: List Int -> Int
+-- import Test.QuickCheck
+
+doubleAll :: List Int -> List Int
 doubleAll = undefined
