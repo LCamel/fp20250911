@@ -1,0 +1,55 @@
+// On non-x86 computers (like M-series MacBooks), the first startup will fail if
+// the image doesn't exist locally. Therefore, we add a pull command.
+// However, this would cause remote connections every time we start the container,
+// so we add a check: only pull if the image doesn't exist (even if it's older).
+// If you want to use the newest image, you can just pull it everytime.
+{
+    "name": "fp20250911",
+    "image": "ghcr.io/scmlab/gcl-all-builder-base:latest",
+    "runArgs": ["--platform=linux/amd64"],
+
+    // pull the latest Docker image only if it does not exist locally (to avoid pulling from remote on every startup)
+    "initializeCommand": "time bash -c 'docker image inspect ghcr.io/scmlab/gcl-all-builder-base:latest >/dev/null 2>&1 || docker pull ghcr.io/scmlab/gcl-all-builder-base:latest --platform=linux/amd64'",
+    // always pull the newest image
+    //"initializeCommand": "time bash -c 'docker pull ghcr.io/scmlab/gcl-all-builder-base:latest --platform=linux/amd64'",
+
+    // "containerEnv": {
+    //     "LANG": "en_US.UTF-8",
+    //     "LC_ALL": "en_US.UTF-8",
+    //     "LC_CTYPE": "en_US.UTF-8",
+    //     "LANGUAGE": "en_US:en"
+    // },
+    "remoteUser": "vscode",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "haskell.haskell"
+            ],
+            "settings": {
+                "git.openRepositoryInParentFolders": "always",
+                //
+                // Since GHCup may not always determine the correct tool versions,
+                // we want to install the specified versions ourselves first
+                // and then have the Haskell extension use them.
+                // This should be the behavior of "haskell.manageHLS" = "PATH".
+                //
+                // However, due to the Haskell Extension's logic, a misleading dialog
+                // will initially appear, and users might make the wrong choice.
+                //
+                // So we change the setting to "haskell.manageHLS" = "GHCup"
+                // and tell GHCup not to install any tools automatically,
+                // which reverts back to the original behavior of using
+                // pre-installed tools from PATH.
+                //
+                "haskell.manageHLS": "GHCup",
+                "haskell.upgradeGHCup": false,
+                "haskell.toolchain": {
+                    "ghc": null,
+                    "hls": null,
+                    "stack": null,
+                    "cabal": null
+                }
+            }
+        }
+    }
+}
